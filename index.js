@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const port = process.env.port || 5000;
+const port = process.env.PORT || 5000;
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
@@ -25,6 +25,20 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    // create all collection
+    const db = client.db("auto-car");
+    const carSellingCollection = db.collection("car-selling");
+
+    /* car selling api start */
+    app.post("/car-selling", async (req, res) => {
+      const car_selling = req.body;
+      car_selling.createdAt = new Date();
+
+      const result = await carSellingCollection.insertOne(car_selling);
+      res.send(result);
+    });
+    /* car selling api end */
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
