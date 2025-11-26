@@ -66,6 +66,48 @@ async function run() {
       const result = await carSellingCollection.insertOne(car_selling);
       res.send(result);
     });
+
+    app.put("/car-selling/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const updateCar = req.body;
+        const filter = { _id: new ObjectId(id) };
+
+        const updateDoc = {
+          $set: { ...updateCar },
+        };
+
+        const result = await carSellingCollection.updateOne(filter, updateDoc);
+
+        if (result.modifiedCount === 1) {
+          return res.send({ success: true, message: "Updated" });
+        }
+
+        return res.send({ success: false, message: "No changes found" });
+      } catch (error) {
+        res.status(500).send({ success: false, message: "Server error" });
+      }
+    });
+
+    app.delete("/car-selling/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const result = await carSellingCollection.deleteOne(query);
+
+        if (result.deletedCount === 1) {
+          return res
+            .status(200)
+            .send({ success: true, message: "Car Deleted" });
+        }
+        return res
+          .status(404)
+          .send({ success: false, message: "Car not found" });
+      } catch (error) {
+        res.status(500).send({ success: false, message: "Server error" });
+      }
+    });
+
     /* car selling api end */
 
     /* car comment api start */
