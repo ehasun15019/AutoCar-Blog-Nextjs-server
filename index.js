@@ -29,6 +29,7 @@ async function run() {
     // create all collection
     const db = client.db("auto-car");
     const carSellingCollection = db.collection("car-selling");
+    const carCommentCollection = db.collection("car-comment");
 
     /* car selling api start */
     app.get("/car-selling-home", async (req, res) => {
@@ -41,25 +42,22 @@ async function run() {
     });
 
     app.get("/car-selling", async (req, res) => {
-      const cursor = carSellingCollection
-        .find()
-        .sort({ createdAt: -1 });
+      const cursor = carSellingCollection.find().sort({ createdAt: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
 
-    app.get("/car-selling/:id", async(req, res) => {
+    app.get("/car-selling/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
 
-      try{
+      try {
         const result = await carSellingCollection.findOne(query);
-        res.send(result)
-      }
-      catch(err) {
+        res.send(result);
+      } catch (err) {
         res.status(500).send({ error: "Invalid ID or server error" });
       }
-    })
+    });
 
     app.post("/car-selling", async (req, res) => {
       const car_selling = req.body;
@@ -69,6 +67,40 @@ async function run() {
       res.send(result);
     });
     /* car selling api end */
+
+    /* car comment api start */
+    app.get("/car-comments/:carId", async (req, res) => {
+      const { carId } = req.params;
+      try {
+        const comments = await carCommentCollection
+          .find({ carId })
+          .sort({ createdAt: -1 })
+          .toArray();
+        res.send(comments);
+      } catch (err) {
+        res.status(500).send({ error: "Server error" });
+      }
+    });
+
+    app.post("/car-comments", async (req, res) => {
+      const { carId, email, comment } = req.body;
+      if (!carId || !email || !comment) {
+        return res.status(400).send({ error: "All fields required" });
+      }
+
+      try {
+        const result = await carCommentCollection.insertOne({
+          carId,
+          email,
+          comment,
+          createdAt: new Date(),
+        });
+        res.send(result);
+      } catch (err) {
+        res.status(500).send({ error: "Server error" });
+      }
+    });
+    /* car comment api end */
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
