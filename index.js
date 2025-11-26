@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 const cors = require("cors");
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 // middleware
 app.use(express.json());
@@ -47,6 +47,19 @@ async function run() {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    app.get("/car-selling/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+
+      try{
+        const result = await carSellingCollection.findOne(query);
+        res.send(result)
+      }
+      catch(err) {
+        res.status(500).send({ error: "Invalid ID or server error" });
+      }
+    })
 
     app.post("/car-selling", async (req, res) => {
       const car_selling = req.body;
