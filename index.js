@@ -31,6 +31,23 @@ async function run() {
     const carSellingCollection = db.collection("car-selling");
 
     /* car selling api start */
+    app.get("/car-selling-home", async (req, res) => {
+      const cursor = carSellingCollection
+        .find()
+        .sort({ createdAt: -1 })
+        .limit(1);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/car-selling", async (req, res) => {
+      const cursor = carSellingCollection
+        .find()
+        .sort({ createdAt: -1 });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post("/car-selling", async (req, res) => {
       const car_selling = req.body;
       car_selling.createdAt = new Date();
